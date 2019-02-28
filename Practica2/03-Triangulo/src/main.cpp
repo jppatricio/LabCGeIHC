@@ -22,7 +22,8 @@ const GLchar* fragmentShaderSource = "#version 330 core\n"
 "out vec4 color;\n"
 "void main()\n"
 "{\n"
-"color = vec4(0.3f, 0.6f, 0.9f, 1.0f);\n"
+//"color = vec4(0.3f, 0.6f, 0.9f, 1.0f);\n"
+"color = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"// Para cambiar el color de salida
 "}\n\0";
 
 GLuint VBO, VAO;
@@ -67,8 +68,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		window = glfwCreateWindow(width, height, strTitle.c_str(),
 			glfwGetPrimaryMonitor(), nullptr);
 	else
-		window = glfwCreateWindow(width, height, strTitle.c_str(), nullptr,
-			nullptr);
+		window = glfwCreateWindow(width, height, strTitle.c_str(), nullptr,nullptr);
 
 	if (window == nullptr) {
 		std::cerr
@@ -98,7 +98,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	// Build and compile our shader program
+	// Build and compile our shader program------------------------------vvvv
 	// Vertex shader
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -134,11 +134,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog
 			<< std::endl;
-	}
+	}//-------------------------------------------------
 
 	// Vertex data
-	GLfloat vertices[] = { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f };
-
+	GLfloat vertices[] = { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 0.0f, //primeros 3 son Vector 0, los siguientes 3 son el V1 etc...
+	0.5, 0.5, 0.0, -0.5, 0.5, 0.0, -0.5, -0.5, 0.0 };
 	// Create Buffers and attributes vertex.
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -237,7 +237,8 @@ void applicationLoop() {
 		// Draw our first triangle
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 6);// numero de vectores
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);

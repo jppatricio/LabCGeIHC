@@ -22,6 +22,11 @@ int lastMousePosY;
 
 double deltaTime;
 
+//---- cambiar de color
+bool isBlue = true;
+bool isRed = false;
+bool isGreen = false;
+
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -63,12 +68,13 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
-
+	// Se linkean las funciones para cada evento de GLFW
 	glfwSetWindowSizeCallback(window, reshapeCallback);
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+	//---------------------------------------------
 
 	// Init glew
 	glewExperimental = GL_TRUE;
@@ -87,6 +93,7 @@ void destroy() {
 	glfwTerminate();
 }
 
+//Comienzan las funciones de los eventos----------------
 void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes) {
 	screenWidth = widthRes;
 	screenHeight = heightRes;
@@ -94,11 +101,40 @@ void reshapeCallback(GLFWwindow* Window, int widthRes, int heightRes) {
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-	if (action == GLFW_PRESS) {
+	if (action == GLFW_PRESS) { // Existen 3: GLFW_PRESS, GLFW_RELEASE y GLFW_REPEAT
 		switch (key) {
 		case GLFW_KEY_ESCAPE:
 			exitApp = true;
 			break;
+		case GLFW_KEY_B: //ESTO ES DE LA PRACTICA
+			isBlue = true;
+			isRed = false;
+			isGreen = false;
+			break;
+
+		case GLFW_KEY_R:
+			isBlue = false;
+			isRed = true;
+			isGreen = false;
+			break;
+
+		case GLFW_KEY_G:
+			isBlue = false;
+			isRed = false;
+			isGreen = true;
+			break;
+
+		/*case GLFW_KEY_B: // quitar gg
+			isBlue = !isBlue;
+			break;
+
+		case GLFW_KEY_R:
+			isRed = !isRed;
+			break;
+
+		case GLFW_KEY_G:
+			isGreen = !isGreen;
+			break;*/
 		}
 	}
 }
@@ -138,7 +174,37 @@ void applicationLoop() {
 	bool psi = true;
 	while (psi) {
 		psi = processInput(true);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);// limpia el buffer de color
+		if (isBlue) {      //Esto es de la práctica
+			glClearColor(0.0,0.0,1.0,1.0);
+		}
+		else if (isRed) {
+			glClearColor(1.0, 0.0, 0.0, 1.0);
+		}
+		else if (isGreen) {
+			glClearColor(0.0, 1.0, 0.0, 1.0);
+		}
+
+		/*float r = 0.0f; Intentando cosas:
+		float g = 0.0f;
+		float b = 0.0f;
+		if (isBlue) {
+			b = 1.0f;
+		}
+		else
+			b = 0.0f;
+		if (isRed) {
+			r = 1.0f;
+		}
+		else
+			r = 0.0f;
+		if (isGreen) {
+			g = 1.0f;
+		}
+		else
+			g = 0.0f;
+		glClearColor(r, g, b, 1.0);*/
+
 		glfwSwapBuffers(window);
 	}
 }

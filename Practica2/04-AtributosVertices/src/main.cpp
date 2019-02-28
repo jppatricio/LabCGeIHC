@@ -30,13 +30,17 @@ const GLchar* fragmentShaderSource = { "#version 400\n"
 
 "void main(void)\n"
 "{\n"
-"  out_Color = vec4(ourColor, 1.0);\n"
+"  out_Color = vec4(ourColor, 1.0);\n"//Color de entrada
 "}\n" };
 
+bool render1 = true; // para solo renderear una de las figuras
+
 GLuint VBO, VAO;
+//Para la nueva figura en vertice:
+GLuint VBO2, VAO2;
 GLint vertexShader, fragmentShader, shaderProgram;
 
-typedef struct {
+typedef struct {// Éste representara cada verice con color
 	float XYZ[3];
 	float RGB[3];
 } Vertex;
@@ -152,19 +156,30 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	Vertex vertices[] =
 	{
+		//      POSICION                COLOR
 		{ {-0.5f, -0.5f, 0.0f } ,{ 1.0f, 0.0f, 0.0f } },
 		{ { 0.5f, -0.5f, 0.0f } ,{ 0.0f, 1.0f, 0.0f } },
-		{ { 0.0f,  0.5f, 0.0f } ,{ 0.0f, 0.0f, 1.0f } }
+		{ { 0.0f,  0.5f, 0.0f } ,{ 0.0f, 0.0f, 1.0f } },
 	};
 
-	const size_t bufferSize = sizeof(vertices);
-	const size_t vertexSize = sizeof(vertices[0]);
-	const size_t rgbOffset = sizeof(vertices[0].XYZ);
+	// se creeara nuevo arreglo---
+	Vertex vertices2[] =
+	{
+		//      POSICION                COLOR
+		{ { 0.0f, 0.0f, 0.0f } ,{ 1.0f, 0.0f, 0.0f } },
+		{ { 1.0f, 0.0f, 0.0f } ,{ 1.0f, 0.0f, 0.0f } },
+		{ { 1.0f,  1.0f, 0.0f } ,{ 1.0f, 0.0f, 0.0f } },
+	};
+	//----------------------------
+	const size_t bufferSize = sizeof(vertices);// tamaño del arreglo 6x4x3 = 18x4 bytes
+	const size_t vertexSize = sizeof(vertices[0]);// tamaño de los vertices 6x4 bytes
+	const size_t rgbOffset = sizeof(vertices[0].XYZ);// offset para lo colores 3x4 bytes (Para ignorar los de posicion en vertices)
 
 	std::cout << "Buffer Size:" << bufferSize << std::endl;
 	std::cout << "Vertex Size:" << vertexSize << std::endl;
 	std::cout << "Buffer size:" << rgbOffset << std::endl;
 
+	//Esto es para el primer triángulo
 	glGenBuffers(1, &VBO);
 
 	glGenVertexArrays(1, &VAO);
@@ -174,8 +189,32 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	glBufferData(GL_ARRAY_BUFFER, bufferSize, vertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize, 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize,
-		(GLvoid*)rgbOffset);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*)rgbOffset);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	//Este es para el segundo triángulo
+	const size_t bufferSize2 = sizeof(vertices2);// tamaño del arreglo
+	const size_t vertexSize2 = sizeof(vertices2[0]);// tamaño de los vertices
+	const size_t rgbOffset2 = sizeof(vertices2[0].XYZ);// offset para lo colores (Para ignorar los de posicion en vertices)
+
+	std::cout << "Buffer2 Size:" << bufferSize2 << std::endl;
+	std::cout << "Vertex2 Size:" << vertexSize2 << std::endl;
+	std::cout << "Buffer2 size:" << rgbOffset2 << std::endl;
+	glGenBuffers(1, &VBO2);
+
+	glGenVertexArrays(1, &VAO2);
+	glBindVertexArray(VAO2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize2, vertices2, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexSize2, 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, vertexSize2, (GLvoid*)rgbOffset2);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -223,6 +262,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		case GLFW_KEY_ESCAPE:
 			exitApp = true;
 			break;
+		case GLFW_KEY_F:
+			render1 = true;
+			break;
+		case GLFW_KEY_S:
+			render1 = false;
+			break;
 		}
 	}
 }
@@ -267,8 +312,16 @@ void applicationLoop() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		
 		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		if (render1) { // para elegir cual renderizar
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
+		else {
+			glBindVertexArray(VAO2);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+		}
+
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
